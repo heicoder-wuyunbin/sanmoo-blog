@@ -1,0 +1,15 @@
+# 本地/内网测试环境配置(无 SSL)
+version: '3.8'
+
+services:
+  sanmoo-server-go:
+    environment:
+      WX_APPID: wx084d5d60b374c2a4
+      WX_SECRET: f5207f4068251d589cc12923acd2d759
+
+  sanmoo-vite:
+    environment:
+      NGINX_ENV: local  # 覆盖为 local 环境
+    ports:
+      - "80:80"
+      # 不暴露 443 端口,因为本地不需要 HTTPS

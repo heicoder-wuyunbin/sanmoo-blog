@@ -1,0 +1,162 @@
+volumes:
+  meilisearch_data:
+    driver: local
+  mysql_data:
+    driver: local
+
+networks:
+  app_net:
+    driver: bridge
+services:
+  # MySQL
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root1234
+      - TZ=Asia/Shanghai
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_general_ci
+    ports:
+      - "3306:3306"
+    privileged: true
+    command:
+      - "--innodb-buffer-pool-size=384M"
+      - "--innodb-log-file-size=64M"
+      - "--max-connections=50"
+      - "--performance-schema=OFF"
+      - "--skip-log-bin"
+      - "--skip-name-resolve"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "1G"
+        reservations:
+          cpus: "0.5"
+          memory: "512M"
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    privileged: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app_net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "128M"
+        reservations:
+          cpus: "0.1"
+          memory: "64M"
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=eIZBPVDXTq-mx_T581sebN4rrlHfzJ2Q-rjldBNAtr4
+      - MEILI_ENV=production
+      - MEILI_MAX_INDEXING_MEMORY=128M
+    volumes:
+      - meilisearch_data:/meili_data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7700/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: "384M"
+        reservations:
+          cpus: "0.2"
+          memory: "192M"
+
+  sanmoo-server-go:
+    build:
+      context: ./sanmoo-server-go
+      dockerfile: Dockerfile
+    image: sanmoo-server-go
+    container_name: sanmoo-server-go
+    ports:
+      - "28080:28080"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=sanmoo_blog
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=root1234
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MEILI_HOST=meilisearch
+      - MEILI_PORT=7700
+      - MEILI_MASTER_KEY=eIZBPVDXTq-mx_T581sebN4rrlHfzJ2Q-rjldBNAtr4
+      - WX_APPID=${WX_APPID:-wxba3def5b90a31afb}
+      - WX_SECRET=${WX_SECRET:-f57a2cc2448d100a5d86ce9eaa171fbb}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "256M"
+        reservations:
+          cpus: "0.15"
+          memory: "128M"
+
+  sanmoo-vite:
+    build:
+      context: ./sanmoo-vite
+      dockerfile: Dockerfile
+    image: sanmoo-vite
+    container_name: sanmoo-vite
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NGINX_ENV=${NGINX_ENV:-production}  # 传递给容器,控制配置文件选择
+    depends_on:
+      - sanmoo-server-go
+    networks:
+      - app_net
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: "128M"
+        reservations:
+          cpus: "0.1"
+          memory: "64M"

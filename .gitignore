@@ -1,0 +1,10 @@
+node_modules/
+.pnpm-store/
+.idea
+.vscode
+.trae
+node_modules
+.DS_Store
+.qoder
+*.log
+console/

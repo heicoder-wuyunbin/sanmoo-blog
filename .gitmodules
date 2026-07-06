@@ -1,0 +1,9 @@
+[submodule "sanmoo-mp"]
+	path = sanmoo-mp
+	url = git@github.com:heicoder-wuyunbin/sanmoo-mp.git
+[submodule "sanmoo-server-go"]
+	path = sanmoo-server-go
+	url = git@github.com:heicoder-wuyunbin/sanmoo-server-go.git
+[submodule "sanmoo-vite"]
+	path = sanmoo-vite
+	url = git@github.com:heicoder-wuyunbin/sanmoo-vite.git
