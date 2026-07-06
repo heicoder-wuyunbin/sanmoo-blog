@@ -41,7 +41,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/sanmoo/sanmoo-blog.git
+git clone https://github.com/heicoder-wuyunbin/sanmoo-blog.git
 cd sanmoo-blog
 
 # 后端开发
