@@ -71,7 +71,7 @@ services:
           memory: "64M"
 
   meilisearch:
-    image: getmeili/meilisearch:latest
+    image: getmeili/meilisearch:v1.49.0
     container_name: meilisearch
     ports:
       - "7700:7700"
