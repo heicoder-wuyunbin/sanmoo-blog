@@ -300,8 +300,8 @@ docker compose logs -f sanmoo-server-go
 - **API**: `http://192.168.168.130/api/...`
 - **管理后台**: `http://192.168.168.130/admin`
 - **后端API直连**: `http://192.168.168.130:28080/api/...`
-- **测试账号**: admin
-- **测试密码**: test1234
+- **测试账号**: `admin`
+- **测试密码**: `test1234`
 
 ---
 
