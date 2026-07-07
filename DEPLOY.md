@@ -163,8 +163,8 @@ ls -la /opt/docker-compose.yaml
 ssh -i ~/.ssh/id_rsa root@192.168.168.130
 cd /opt/sanmoo-blog
 
-# 构建应用镜像（生产环境）
-./deploy.sh production
+# 构建应用镜像（测试环境）
+./deploy.sh local
 
 # 导出应用镜像到离线包
 ./deploy.sh export
