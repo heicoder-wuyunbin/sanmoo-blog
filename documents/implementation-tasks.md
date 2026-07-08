@@ -11,7 +11,7 @@
 - 严格按任务编号顺序推进
 - 严格遵守“目录不交叉、职责不交叉、提交不交叉”
 
-本清单以 [plan.md](file:///c:/workspace/sanmoo-blog/plan.md) 为上位约束。
+本清单以 [plan.md](file:///Users/wuyunbin/workspace/sanmoo-blog/plan.md) 为上位约束。
 
 ---
 
