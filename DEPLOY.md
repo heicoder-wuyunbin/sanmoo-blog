@@ -2,7 +2,127 @@
 
 ## 📋 快速开始
 
-### 0️⃣ MacBook Pro本地开发环境 (MacBook Pro + Homebrew)
+### 0️⃣ Windows 11 本地开发环境 (Win11 + WSL + Docker Desktop)
+
+适用于在 Windows 11 上使用 WSL 和 Docker Desktop 进行本地开发。
+
+#### 推荐：高效开发模式（go run + pnpm dev）
+
+在日常开发中，推荐使用此模式。依赖服务（MySQL、Redis、Meilisearch）通过 Docker 运行，而前端和后端直接在本地运行，利用 Vite 代理解决跨域问题，修改代码后可立即热更新，无需重新构建 Docker 镜像。
+
+**环境要求：**
+- Windows 11 22H2+
+- WSL 2 (Ubuntu 26.04)
+- Docker Desktop（已开启 WSL 集成）
+- Go 1.22+（安装在 WSL 或 Windows 中均可）
+- Node.js 22+ + pnpm（安装在 Windows 中）
+
+**步骤一：启动依赖服务**
+
+```bash
+# 在 PowerShell 或 WSL 终端中启动基础服务
+cd c:\workspace\sanmoo-blog
+
+# 方式一：使用专用开发配置（推荐）
+docker compose -f docker-compose.dev.yaml up -d
+
+# 方式二：使用主配置文件
+docker compose up -d mysql redis meilisearch
+
+# 等待服务启动后创建数据库（首次运行）
+docker exec -it mysql mysql -uroot -proot1234 -e "CREATE DATABASE IF NOT EXISTS sanmoo_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+```
+
+**步骤二：启动后端服务（WSL 终端）**
+
+```bash
+cd c:\workspace\sanmoo-blog\sanmoo-server-go
+
+# 下载依赖（首次运行）
+go mod download
+
+# 直接运行 Go 程序
+go run cmd/server/main.go
+
+# 启动成功后，API 地址: http://localhost:28080
+```
+
+> **说明**：`application.properties` 已默认配置为连接 `localhost:3306`（MySQL）和 `localhost:6379`（Redis），与 Docker 暴露的端口一致。
+
+**步骤三：启动前端服务（PowerShell 终端）**
+
+```bash
+cd c:\workspace\sanmoo-blog\sanmoo-vite
+
+# 安装依赖（首次运行）
+pnpm install
+
+# 启动 Vite 开发服务器
+pnpm dev
+
+# 访问: http://localhost:8000
+```
+
+> **说明**：Vite 已配置代理（见 `vite.config.ts`），将 `/api`、`/mp`、`/uploads` 请求转发到 `http://127.0.0.1:28080`，自动解决跨域问题。
+
+**访问方式：**
+
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| 前端页面 | `http://localhost:8000` | 博客首页 |
+| 管理后台 | `http://localhost:8000/admin` | 管理员后台 |
+| API 直连 | `http://localhost:28080/api/...` | 后端接口 |
+| 测试账号 | `admin / test1234` | 管理员账号 |
+
+**特点:**
+- ✅ 热更新：修改代码后立即生效，无需重新构建
+- ✅ 调试便捷：可使用 IDE 直接调试 Go 和 React 代码
+- ✅ 资源占用低：仅运行必要的容器服务
+- ✅ 效率提升：开发验证阶段无需等待 Docker 构建
+
+---
+
+#### Docker 完整部署模式
+
+当需要验证 Docker 环境下的运行效果时，使用完整的 Docker 部署模式。
+
+**依赖服务（Docker Desktop 运行）：**
+
+| 服务 | Docker 镜像 | 默认端口 | 说明 |
+|------|------------|---------|------|
+| MySQL | `mysql:8.4` | `3306` | 数据库，root 密码：`root1234` |
+| Redis | `redis:latest` | `6379` | 缓存 |
+| Meilisearch | `getmeili/meilisearch:v1.49.0` | `7700` | 全文搜索 |
+
+**启动所有服务：**
+
+```bash
+# 在 PowerShell 或 WSL 终端中执行
+cd c:\workspace\sanmoo-blog
+
+# 执行部署脚本（本地测试环境）
+./deploy.sh local
+
+# 或手动构建并启动
+docker compose down
+NGINX_ENV=local docker compose -f docker-compose.yaml -f docker-compose.local.yaml build --no-cache
+NGINX_ENV=local docker compose -f docker-compose.yaml -f docker-compose.local.yaml up -d
+```
+
+**访问方式：**
+- **地址**: `http://localhost`
+- **管理后台**: `http://localhost/admin`
+- **测试账号**: `admin` / `test1234`
+
+**特点:**
+- ✅ 使用 Docker Desktop 统一管理所有服务
+- ✅ WSL 2 提供类 Unix 开发环境
+- ✅ 数据持久化存储在 Docker Volume 中
+- ✅ 与生产环境配置一致
+
+---
+
+### 1️⃣ MacBook Pro本地开发环境 (MacBook Pro + Homebrew)
 
 适用于在 macOS 上使用 Homebrew 安装依赖进行本地开发。
 
@@ -57,6 +177,11 @@ go run cmd/server/main.go
 # API 地址: http://localhost:28080
 ```
 
+**测试账号信息：**
+- **管理后台**: `http://localhost:8000/admin`
+- **测试账号**: `admin`
+- **测试密码**: `test1234`
+
 **特点:**
 - ✅ 本地原生运行，性能最佳
 - ✅ 适合日常开发调试
@@ -65,7 +190,7 @@ go run cmd/server/main.go
 
 ---
 
-### 1️⃣ 生产环境部署 (HTTPS + SSL)
+### 2️⃣ 生产环境部署 (HTTPS + SSL)
 
 由于正式服务器资源有限（2核2G），采用**离线镜像部署**方式：
 
@@ -94,7 +219,7 @@ cd /opt && docker compose up -d
 
 ---
 
-### 2️⃣ Legion内网测试部署 (HTTP, 无SSL)
+### 3️⃣ Legion内网测试部署 (HTTP, 无SSL)
 
 ```bash
 # 部署内网测试环境
@@ -104,19 +229,13 @@ cd /opt && docker compose up -d
 **特点:**
 - ✅ HTTP 协议,无需 SSL 证书
 - ✅ 简化的安全规则
-- ✅ IP 地址访问: `http://192.168.168.130`
+- ✅ IP 地址访问: `http://localhost`
 - ✅ 微信测试号配置
 - ✅ 适合内网测试、开发环境
 
 ---
 
 ## 🔐 服务器连接配置
-
-### 内网测试服务器
-- **IP地址**: `192.168.168.130`
-- **登录账号**: `root`
-- **认证方式**: RSA 公私钥认证
-- **项目目录**: `/opt/sanmoo-blog`
 
 ### 生产服务器
 - **域名**: `backendart.com`
@@ -126,11 +245,6 @@ cd /opt && docker compose up -d
 - **服务器配置**: 2核 CPU / 2GB 内存
 
 ### SSH 登录示例
-
-```bash
-# 登录内网测试服务器
-ssh -i ~/.ssh/id_rsa root@192.168.168.130
-cd /opt/sanmoo-blog
 
 # 登录生产服务器
 ssh -i ~/.ssh/id_rsa root@backendart.com
@@ -156,15 +270,14 @@ docker compose version
 ls -la /opt/docker-compose.yaml
 ```
 
-### 步骤二：在legion测试机构建应用镜像
+### 步骤二：在 Win11 本地构建应用镜像
 
 ```bash
-# 登录测试机
-ssh -i ~/.ssh/id_rsa root@192.168.168.130
-cd /opt/sanmoo-blog
+# 在 Win11 本地 PowerShell 或 WSL 终端中构建镜像
+cd c:\workspace\sanmoo-blog
 
-# 构建应用镜像（测试环境）
-./deploy.sh local
+# 构建生产环境镜像
+./deploy.sh production
 
 # 导出应用镜像到离线包
 ./deploy.sh export
@@ -191,12 +304,11 @@ docker compose ps
 
 ## 🔧 生产环境更新部署流程
 
-### 步骤一：在测试机构建镜像
+### 步骤一：在 Win11 本地构建镜像
 
 ```bash
-# 登录测试机
-ssh -i ~/.ssh/id_rsa root@192.168.168.130
-cd /opt/sanmoo-blog
+# 在 Win11 本地 PowerShell 或 WSL 终端中构建镜像
+cd c:\workspace\sanmoo-blog
 
 # 执行部署脚本构建生产环境镜像
 ./deploy.sh production
@@ -247,23 +359,22 @@ rm /opt/sanmoo-images.tar
 
 ---
 
-## 🔧 内网测试环境部署步骤
+## 🔧 Win11 本地测试环境部署步骤
 
 ### 自动化部署（推荐）
 
 ```bash
-# 登录测试机
-ssh -i ~/.ssh/id_rsa root@192.168.168.130
-cd /opt/sanmoo-blog
+# 在 Win11 本地 PowerShell 或 WSL 终端中执行
+cd c:\workspace\sanmoo-blog
 
-# 执行部署脚本
+# 执行部署脚本（本地测试环境）
 ./deploy.sh local
 ```
 
 ### 手动部署
 
 ```bash
-cd /opt/sanmoo-blog
+cd c:\workspace\sanmoo-blog
 git pull origin main
 docker compose down
 NGINX_ENV=local docker compose -f docker-compose.yaml -f docker-compose.local.yaml build --no-cache
@@ -295,11 +406,13 @@ docker compose logs -f sanmoo-server-go
 - **API**: `https://backendart.com/api/...`
 - **管理后台**: `https://backendart.com/admin`
 
-### 内网测试环境:
-- **IP地址**: `http://192.168.168.130`
-- **API**: `http://192.168.168.130/api/...`
-- **管理后台**: `http://192.168.168.130/admin`
-- **后端API直连**: `http://192.168.168.130:28080/api/...`
+### Win11 本地测试环境:
+- **地址**: `http://localhost`
+- **API**: `http://localhost/api/...`
+- **登录**: `http://localhost/user/login`
+- **管理后台**: `http://localhost/admin`
+- **前端开发**: `http://localhost:8000`
+- **后端API直连**: `http://localhost:28080/api/...`
 - **测试账号**: `admin`
 - **测试密码**: `test1234`
 

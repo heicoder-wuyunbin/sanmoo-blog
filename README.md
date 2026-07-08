@@ -34,22 +34,62 @@
 
 - Go 1.21+
 - Node.js 20+
-- MySQL 8.0+
-- Docker（可选）
+- MySQL 8.0+（可选，推荐使用 Docker）
+- Docker Desktop（Windows/macOS 推荐）
 
 ### 本地开发
+
+#### Windows 环境（Docker Desktop）
 
 ```bash
 # 克隆项目
 git clone https://github.com/heicoder-wuyunbin/sanmoo-blog.git
 cd sanmoo-blog
 
+# 使用 Docker Desktop 启动依赖服务（MySQL、Redis、Meilisearch）
+docker compose up -d mysql redis meilisearch
+
+# 等待服务启动后创建数据库
+docker exec -it mysql mysql -uroot -proot1234 -e "CREATE DATABASE IF NOT EXISTS sanmoo_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+
+# 后端开发（在 WSL 或 PowerShell 中）
+cd sanmoo-server-go
+go mod download
+cp .env.example .env
+# 修改 .env 配置数据库连接为 localhost:3306
+go run cmd/server/main.go
+
+# 前端开发
+cd sanmoo-vite
+pnpm install
+pnpm dev
+```
+
+**测试账号：**
+- **管理后台**: `http://localhost:8000/admin`
+- **账号**: `admin`
+- **密码**: `test1234`
+
+#### macOS 环境（Homebrew）
+
+```bash
+# 克隆项目
+git clone https://github.com/heicoder-wuyunbin/sanmoo-blog.git
+cd sanmoo-blog
+
+# 使用 Homebrew 安装并启动依赖服务
+brew services start mysql
+brew services start redis
+brew services start meilisearch
+
+# 创建数据库
+mysql -uroot -proot1234 -e "CREATE DATABASE IF NOT EXISTS sanmoo_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+
 # 后端开发
 cd sanmoo-server-go
 go mod download
 cp .env.example .env
-# 修改 .env 配置数据库连接
-go run main.go
+go run cmd/server/main.go
 
 # 前端开发
 cd sanmoo-vite
@@ -60,7 +100,7 @@ pnpm dev
 ### Docker 部署
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## 项目结构

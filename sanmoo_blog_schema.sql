@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.4.9, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.33, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sanmoo_blog
 -- ------------------------------------------------------
--- Server version	8.4.9
+-- Server version	8.4.6
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -51,7 +51,7 @@ CREATE TABLE `t_access_log` (
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
   KEY `idx_is_error` (`is_error`) USING BTREE,
   KEY `idx_error_id` (`error_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7323 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=7607 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,6 +64,7 @@ DROP TABLE IF EXISTS `t_article`;
 CREATE TABLE `t_article` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '文章id',
   `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文章标题',
+  `slug` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章 URL 别名（SEO 友好）',
   `title_image` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '文章题图',
   `description` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文章描述',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -72,10 +73,12 @@ CREATE TABLE `t_article` (
   `share_num` int DEFAULT '0' COMMENT '分享次数',
   `is_top` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否置顶：0：否 1：是',
   `is_published` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否发布：0：否 1：是',
+  `publish_time` datetime DEFAULT NULL COMMENT 'å®šæ—¶å‘å¸ƒæ—¶é—´',
   `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '创建人',
   `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '更新人',
   `like_num` int NOT NULL DEFAULT '0' COMMENT 'ç‚¹èµžæ•°',
   PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_slug` (`slug`),
   KEY `idx_create_time` (`create_time`) USING BTREE,
   KEY `idx_is_top` (`is_top`) USING BTREE,
   KEY `idx_is_published` (`is_published`) USING BTREE,
@@ -184,7 +187,7 @@ CREATE TABLE `t_blog_core_config` (
   `blog_name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '博客名称',
   `author` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '作者名',
   `introduction` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '介绍语',
-  `privacy_policy` text COLLATE utf8mb4_unicode_ci COMMENT '隐私政策内容',
+  `privacy_policy` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '隐私政策内容',
   `rss_enabled` tinyint(1) DEFAULT '1' COMMENT 'RSS',
   `avatar` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '作者头像',
   `config_version` int unsigned NOT NULL DEFAULT '1' COMMENT '配置版本号',
@@ -212,6 +215,80 @@ CREATE TABLE `t_blog_email_config` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='后台邮件 SMTP 配置表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `t_blog_privacy_config`
+--
+
+DROP TABLE IF EXISTS `t_blog_privacy_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_blog_privacy_config` (
+  `id` tinyint unsigned NOT NULL DEFAULT '1' COMMENT 'idï¼Œå›ºå®šä¸º1',
+  `privacy_policy` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'éšç§æ”¿ç­–å†…å®¹',
+  `config_version` int unsigned NOT NULL DEFAULT '1' COMMENT 'é…ç½®ç‰ˆæœ¬å·',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'åˆ›å»ºäºº',
+  `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'æ›´æ–°äºº',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `chk_privacy_single_row` CHECK ((`id` = 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='åšå®¢éšç§æ”¿ç­–é…ç½®è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `t_blog_search_config`
+--
+
+DROP TABLE IF EXISTS `t_blog_search_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_blog_search_config` (
+  `id` tinyint unsigned NOT NULL DEFAULT '1' COMMENT 'idï¼Œå›ºå®šä¸º1',
+  `recommend_strategy` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'rule' COMMENT 'æŽ¨èç­–ç•¥ï¼šrule/weighted/cf',
+  `search_engine` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'NONE' COMMENT 'æœç´¢å¼•æ“Ž: NONE/MEILISEARCH',
+  `hot_search_mode` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'çƒ­é—¨æœç´¢æ¨¡å¼ï¼š0=ä¼ªçƒ­é—¨(FAKE) 1=çœŸçƒ­é—¨(REAL)',
+  `hot_search_words` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'çƒ­é—¨æœç´¢è¯JSONæ•°ç»„',
+  `meilisearch_host` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'MeiliSearchä¸»æœºåœ°å€',
+  `meilisearch_api_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'MeiliSearch API Key',
+  `meilisearch_index` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'articles' COMMENT 'MeiliSearchç´¢å¼•åç§°',
+  `meilisearch_last_sync_time` datetime DEFAULT NULL,
+  `config_version` int unsigned NOT NULL DEFAULT '1' COMMENT 'é…ç½®ç‰ˆæœ¬å·',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'åˆ›å»ºäºº',
+  `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'æ›´æ–°äºº',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `chk_search_single_row` CHECK ((`id` = 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='åšå®¢æœç´¢ä¸ŽæŽ¨èé…ç½®è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `t_blog_social_config`
+--
+
+DROP TABLE IF EXISTS `t_blog_social_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_blog_social_config` (
+  `id` tinyint unsigned NOT NULL DEFAULT '1' COMMENT 'idï¼Œå›ºå®šä¸º1',
+  `github_home` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'GitHubä¸»é¡µ',
+  `csdn_home` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'CSDNä¸»é¡µ',
+  `gitee_home` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'Giteeä¸»é¡µ',
+  `zhihu_home` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'çŸ¥ä¹Žä¸»é¡µ',
+  `github_show` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦æ˜¾ç¤ºGitHub',
+  `csdn_show` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦æ˜¾ç¤ºCSDN',
+  `gitee_show` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦æ˜¾ç¤ºGitee',
+  `zhihu_show` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'æ˜¯å¦æ˜¾ç¤ºçŸ¥ä¹Ž',
+  `config_version` int unsigned NOT NULL DEFAULT '1' COMMENT 'é…ç½®ç‰ˆæœ¬å·',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'åˆ›å»ºæ—¶é—´',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'æ›´æ–°æ—¶é—´',
+  `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'åˆ›å»ºäºº',
+  `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'æ›´æ–°äºº',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `chk_social_single_row` CHECK ((`id` = 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='åšå®¢ç¤¾äº¤é“¾æŽ¥é…ç½®è¡¨';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -325,7 +402,7 @@ CREATE TABLE `t_error_log` (
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
   KEY `idx_error_code` (`error_code`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1177 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统错误日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=1214 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统错误日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -337,10 +414,10 @@ DROP TABLE IF EXISTS `t_link`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `t_link` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '链接名称',
-  `url` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '链接地址',
-  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '链接描述',
-  `icon` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '图标URL',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '链接名称',
+  `url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '链接地址',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '链接描述',
+  `icon` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '图标URL',
   `sort_order` int NOT NULL DEFAULT '0' COMMENT '排序值',
   `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -518,7 +595,7 @@ DROP TABLE IF EXISTS `t_mp_user_subscribe`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `t_mp_user_subscribe` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `openid` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `openid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `subscribe` tinyint(1) DEFAULT NULL,
   `create_time` datetime(3) DEFAULT NULL,
   `update_time` datetime(3) DEFAULT NULL,
@@ -551,6 +628,33 @@ CREATE TABLE `t_mp_user_tag` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `t_permission`
+--
+
+DROP TABLE IF EXISTS `t_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_permission` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `perm_key` varchar(128) NOT NULL COMMENT '权限标识',
+  `name` varchar(64) NOT NULL COMMENT '权限名称',
+  `module` varchar(64) NOT NULL COMMENT '所属模块',
+  `type` varchar(32) NOT NULL DEFAULT 'api' COMMENT '类型：api / menu / button',
+  `description` varchar(255) DEFAULT NULL COMMENT '描述',
+  `front_path` varchar(128) DEFAULT NULL COMMENT '前端菜单路径',
+  `icon` varchar(64) DEFAULT NULL COMMENT '前端菜单图标',
+  `sort_order` int NOT NULL DEFAULT '0' COMMENT '排序',
+  `status` tinyint NOT NULL DEFAULT '1' COMMENT '1启用 0禁用',
+  `create_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_perm_key` (`perm_key`),
+  KEY `idx_module` (`module`),
+  KEY `idx_type` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='权限表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `t_role`
 --
 
@@ -560,11 +664,33 @@ DROP TABLE IF EXISTS `t_role`;
 CREATE TABLE `t_role` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '角色id',
   `name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è§’è‰²æè¿°',
+  `status` tinyint NOT NULL DEFAULT '1' COMMENT 'çŠ¶æ€ 1å¯ç”¨ 0ç¦ç”¨',
+  `sort_order` int NOT NULL DEFAULT '0' COMMENT 'æŽ’åº',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `uk_name` (`name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色表';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `t_role_permission`
+--
+
+DROP TABLE IF EXISTS `t_role_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_role_permission` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `role_id` bigint NOT NULL,
+  `perm_key` varchar(128) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_role_perm` (`role_id`,`perm_key`),
+  KEY `idx_role_id` (`role_id`),
+  KEY `idx_perm_key` (`perm_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='角色-权限关联表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -754,4 +880,4 @@ CREATE TABLE `t_visitor_record` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-05 23:53:18
+-- Dump completed on 2026-07-08 20:57:22
