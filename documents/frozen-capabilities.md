@@ -56,16 +56,22 @@
 
 ### 2.3 小程序用户管理模块
 
-| 能力项 | 接口 | 数据表 | 冻结原因 | 冻结时间 |
-|--------|------|--------|----------|----------|
-| 用户列表 | `/admin/mp-users` | `t_mp_user` | 重运营画像，个人站点无需用户运营 | 2026-07 |
-| 用户详情 | `/admin/mp-users/:openid` | `t_mp_user` | 重运营画像 | 2026-07 |
-| 用户画像 | `/admin/mp-users/:openid/profile` | `t_mp_user_profile` | 重运营画像，合规风险 | 2026-07 |
-| 生成画像 | `/admin/mp-users/:openid/profile` (POST) | `t_mp_user_profile` | 重运营画像，不主动生成 | 2026-07 |
-| 生成标签 | `/admin/mp-users/:openid/tags/generate` | `t_mp_user_tag` | 重运营画像，不主动生成 | 2026-07 |
-| 用户标签 | `/admin/mp-users/:openid/tags` | `t_mp_user_tag` | 重运营画像 | 2026-07 |
-| 删除标签 | `/admin/mp-users/:openid/tags/:tagId` | `t_mp_user_tag` | 重运营画像 | 2026-07 |
-| 刷新雷达 | `/admin/mp-users/:openid/radar/refresh` | `t_mp_user_profile` | 重运营画像，不主动刷新 | 2026-07 |
+> **L2 落地状态：已完成代码层冻结（2026-07-09）**
+>
+> 三个生成类接口（生成画像、生成标签、刷新雷达）已在 service 层短路，返回空结构，不再计算与写入数据库。
+> 其余只读接口保持原逻辑，等待前端隐藏入口。
+> 详见 [mp-user-domain-downgrade.md](file:///c:/workspace/sanmoo-blog/documents/mp-user-domain-downgrade.md)。
+
+| 能力项 | 接口 | 数据表 | 冻结原因 | 冻结时间 | L2 落地 |
+|--------|------|--------|----------|----------|---------|
+| 用户列表 | `/admin/mp-users` | `t_mp_user` | 重运营画像，个人站点无需用户运营 | 2026-07 | 只读保留 |
+| 用户详情 | `/admin/mp-users/:openid` | `t_mp_user` | 重运营画像 | 2026-07 | 只读保留 |
+| 用户画像 | `/admin/mp-users/:openid/profile` | `t_mp_user_profile` | 重运营画像，合规风险 | 2026-07 | 只读保留 |
+| 生成画像 | `/admin/mp-users/:openid/profile` (POST) | `t_mp_user_profile` | 重运营画像，不主动生成 | 2026-07 | **已短路** |
+| 生成标签 | `/admin/mp-users/:openid/tags/generate` | `t_mp_user_tag` | 重运营画像，不主动生成 | 2026-07 | **已短路** |
+| 用户标签 | `/admin/mp-users/:openid/tags` | `t_mp_user_tag` | 重运营画像 | 2026-07 | 只读保留 |
+| 删除标签 | `/admin/mp-users/:openid/tags/:tagId` | `t_mp_user_tag` | 重运营画像 | 2026-07 | 保留 |
+| 刷新雷达 | `/admin/mp-users/:openid/radar/refresh` | `t_mp_user_profile` | 重运营画像，不主动刷新 | 2026-07 | **已短路** |
 
 ### 2.4 缓存管理模块
 
@@ -214,3 +220,4 @@
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | v1.0 | 2026-07-08 | 初始版本，基于 router.go 和业务边界梳理 |
+| v1.1 | 2026-07-09 | L2 落地：小程序用户管理模块三个生成类接口已在代码层短路，新增 L2 落地列 |
