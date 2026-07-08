@@ -200,22 +200,86 @@
 ### 4.1 迁移步骤
 
 1. **创建新表**：创建 `t_blog_brand_config`、`t_blog_compliance_config`、`t_blog_channel_config`、`t_blog_infrastructure_config`
-2. **数据迁移**：从现有表迁移数据到新表
+2. **数据迁移**：从现有表迁移数据到新表，使用 INSERT ... ON DUPLICATE KEY UPDATE 确保安全迁移
 3. **代码适配**：修改 Service 和 Repository 层支持新旧表读写
 4. **接口兼容**：对外接口保持不变，内部使用新表
 5. **逐步淘汰**：后续版本移除旧表
 
 ### 4.2 接口兼容策略
 
-| 阶段 | 说明 |
-|------|------|
-| 阶段1（L1） | 创建新表并迁移数据，代码同时支持新旧表 |
-| 阶段2（L2） | 代码优先使用新表，旧表作为备份 |
-| 阶段3（L3） | 移除旧表相关代码 |
+| 阶段 | 说明 | 代码行为 | 旧表状态 |
+|------|------|----------|----------|
+| 阶段1（L1） | 创建新表并迁移数据，代码仍读取旧表 | 读写均指向旧表，新表仅做数据备份 | 主表，正常读写 |
+| 阶段2（L2） | 代码优先使用新表，旧表作为备份 | 读：新表优先，旧表兜底；写：同时写入新旧表 | 备份表，仅写不读 |
+| 阶段3（L3） | 移除旧表相关代码 | 读写均指向新表 | 可删除（需确认前端无依赖） |
 
-### 4.3 SQL变更方案
+### 4.3 SQL 变更方案
 
-详细SQL变更方案见 `migrations/` 目录下的迁移脚本。
+#### 4.3.1 迁移脚本清单
+
+| 文件 | 说明 | 执行顺序 |
+|------|------|----------|
+| `sanmoo-server-go/migrations/20260709_create_new_config_tables.sql` | 创建四个新配置表 | 1/2 |
+| `sanmoo-server-go/migrations/20260709_migrate_config_data.sql` | 从旧表迁移数据到新表 | 2/2 |
+
+#### 4.3.2 新表创建说明
+
+新表使用 `CREATE TABLE IF NOT EXISTS` 语法，确保重复执行不会报错：
+
+- **t_blog_brand_config**：站点品牌配置，主键固定为1，包含博客名、作者、介绍、头像、站点地址、RSS开关
+- **t_blog_compliance_config**：合规配置，包含隐私政策、备案信息、联系方式、数据保留说明、账号注销说明
+- **t_blog_channel_config**：渠道配置，包含社交链接、展示开关、Web/小程序渠道启用状态
+- **t_blog_infrastructure_config**：基础设施配置，包含搜索、存储、邮件等技术配置
+
+#### 4.3.3 数据迁移策略
+
+- 使用 `INSERT ... ON DUPLICATE KEY UPDATE` 语法，避免主键冲突
+- 旧表数据优先，新表已存在数据不被覆盖（保护已手动配置的新表数据）
+- 字段优先级：`t_blog_social_config` > `t_blog_ui_config`（社交字段），`t_blog_search_config` > `t_blog_ui_config`（搜索字段），`t_blog_core_config` > `t_blog_privacy_config`（隐私政策）
+- 使用 `COALESCE()` 函数处理 NULL 值，确保迁移后字段不为 NULL
+
+#### 4.3.4 旧表保留策略
+
+| 旧表名 | 保留原因 | 建议删除时机 |
+|--------|----------|--------------|
+| `t_blog_core_config` | 核心配置主表，代码依赖 | L3 确认前端无依赖后 |
+| `t_blog_ui_config` | UI配置主表，代码依赖，含重复字段 | L3 确认前端无依赖后 |
+| `t_blog_privacy_config` | 隐私配置，与 core_config 重复 | L2 完成新表迁移后 |
+| `t_blog_social_config` | 社交配置，已迁移到 channel_config | L2 完成新表迁移后 |
+| `t_blog_search_config` | 搜索配置，已迁移到 infrastructure_config | L2 完成新表迁移后 |
+| `t_blog_storage_config` | 存储配置，已迁移到 infrastructure_config | L2 完成新表迁移后 |
+| `t_blog_email_config` | 邮件配置，已迁移到 infrastructure_config | L2 完成新表迁移后 |
+
+### 4.4 字段契约说明
+
+#### 4.4.1 新增字段（L1 阶段）
+
+| 字段名 | 新表 | 说明 | L2/L4 依赖 |
+|--------|------|------|------------|
+| `site_url` | `t_blog_brand_config` | 站点地址 | L4 合规展示 |
+| `filing_info` | `t_blog_compliance_config` | 备案信息（JSON） | L4 合规展示 |
+| `contact_info` | `t_blog_compliance_config` | 联系方式（JSON） | L4 合规展示 |
+| `data_retention_policy` | `t_blog_compliance_config` | 数据保留说明 | L4 合规展示 |
+| `account_deletion_guide` | `t_blog_compliance_config` | 账号注销说明 | L4 用户删除路径 |
+| `web_enabled` | `t_blog_channel_config` | Web渠道启用 | L2 渠道控制 |
+| `mp_enabled` | `t_blog_channel_config` | 小程序渠道启用 | L2 渠道控制 |
+| `email_config_json` | `t_blog_infrastructure_config` | 邮件配置JSON | L2 基础设施统一管理 |
+
+#### 4.4.2 合并字段（从多个旧表合并到一个新表）
+
+| 字段名 | 来源旧表 | 目标新表 | 说明 |
+|--------|----------|----------|------|
+| `github_home` | `t_blog_social_config`, `t_blog_ui_config` | `t_blog_channel_config` | social_config 优先 |
+| `search_engine` | `t_blog_search_config`, `t_blog_ui_config` | `t_blog_infrastructure_config` | search_config 优先 |
+| `privacy_policy` | `t_blog_core_config`, `t_blog_privacy_config` | `t_blog_compliance_config` | core_config 优先 |
+
+### 4.5 回滚方案
+
+若迁移过程中出现问题，可执行以下回滚操作：
+
+1. **删除新表**：执行 `DROP TABLE IF EXISTS` 删除四个新表
+2. **恢复旧表**：旧表未被修改，无需恢复
+3. **代码回滚**：当前代码仍读取旧表，无需修改
 
 ---
 
@@ -224,3 +288,4 @@
 | 版本 | 日期 | 说明 |
 |------|------|------|
 | v1.0 | 2026-07-08 | 初始版本，基于 plan.md 设计 |
+| v1.1 | 2026-07-09 | 补充 SQL 迁移脚本说明、兼容策略、字段契约 |
