@@ -468,6 +468,44 @@ ssh root@backendart.com "docker load -i /opt/sanmoo-images.tar && cd /opt && doc
 
 ---
 
+## 📊 数据保留策略
+
+Sanmoo Blog 作为个人技术内容发布平台，遵循以下数据保留策略：
+
+| 数据类型 | 保留期限 | 说明 |
+|----------|----------|------|
+| 访问日志 (`t_access_log`) | 30天 | 用于运维排查，定期清理 |
+| 错误日志 (`t_error_log`) | 90天 | 用于问题追踪，定期清理 |
+| 搜索历史 (`t_search_history`) | 30天 | 用于搜索优化 |
+| 小程序浏览历史 (`t_mp_browse_history`) | 30天 | 用户浏览记录 |
+| 推荐曝光记录 (`t_mp_reco_exposure`) | 30天 | 推荐效果统计 |
+| 文章PV统计 (`t_statistics_article_pv`) | 365天 | 内容数据统计 |
+| 用户基础信息 | 长期 | 直至用户主动注销 |
+| 用户收藏/订阅 | 长期 | 直至用户主动注销 |
+
+**自动清理机制：**
+
+后端服务内置定时清理任务，每日凌晨 3:00 自动执行，清理过期日志数据。
+
+手动触发清理：
+
+```bash
+# 通过管理端API手动触发清理
+curl -X POST http://localhost:28080/admin/maintenance/cleanup
+```
+
+**用户数据删除：**
+
+小程序用户可通过 `DELETE /mp/user` 接口删除账号及所有相关数据，包括：
+- 用户基础信息
+- 用户收藏
+- 浏览历史
+- 订阅状态
+- 兴趣画像
+- 用户标签
+
+---
+
 ## 💡 部署注意事项
 
 1. **生产服务器资源限制**: 由于正式服务器仅有2核2G，推荐使用离线镜像部署方式，避免在生产服务器上执行构建操作
@@ -475,4 +513,5 @@ ssh root@backendart.com "docker load -i /opt/sanmoo-images.tar && cd /opt && doc
 3. **环境差异**: 生产环境与内网测试环境配置不完全一致，生产服务器使用独立的 docker-compose.yaml
 4. **SSL证书**: 生产环境使用HTTPS，SSL证书配置在生产服务器的 docker-compose.yaml 中
 5. **离线镜像包**: 仅包含应用服务镜像（sanmoo-server-go、sanmoo-vite），生产服务器已预装基础镜像（mysql:8.4、redis:latest、getmeili/meilisearch:latest）
+6. **定期维护**: 系统自动执行日志清理，但建议定期检查数据库大小和服务器资源使用情况
 
