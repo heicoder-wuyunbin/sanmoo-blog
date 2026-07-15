@@ -51,7 +51,7 @@ CREATE TABLE `t_access_log` (
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
   KEY `idx_is_error` (`is_error`) USING BTREE,
   KEY `idx_error_id` (`error_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7818 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=7828 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -809,4 +809,4 @@ CREATE TABLE `t_user_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-15 12:49:25
+-- Dump completed on 2026-07-16  6:38:23
