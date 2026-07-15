@@ -3,9 +3,7 @@ version: '3.8'
 
 services:
   sanmoo-server-go:
-    environment:
-      WX_APPID: wx084d5d60b374c2a4
-      WX_SECRET: f5207f4068251d589cc12923acd2d759
+    environment: {}
 
   sanmoo-vite:
     environment:

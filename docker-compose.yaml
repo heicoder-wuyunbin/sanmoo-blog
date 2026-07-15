@@ -118,8 +118,7 @@ services:
       - MEILI_HOST=meilisearch
       - MEILI_PORT=7700
       - MEILI_MASTER_KEY=eIZBPVDXTq-mx_T581sebN4rrlHfzJ2Q-rjldBNAtr4
-      - WX_APPID=${WX_APPID:-wxba3def5b90a31afb}
-      - WX_SECRET=${WX_SECRET:-f57a2cc2448d100a5d86ce9eaa171fbb}
+      # 微信配置已迁移至后台「站点设置 → 微信配置」页面，支持开发/生产环境动态切换
       - QINIU_ACCESS_KEY=${QINIU_ACCESS_KEY:-}
       - QINIU_SECRET_KEY=${QINIU_SECRET_KEY:-}
       - QINIU_BUCKET=${QINIU_BUCKET:-backendart}
