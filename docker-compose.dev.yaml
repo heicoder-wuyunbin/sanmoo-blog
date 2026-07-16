@@ -23,7 +23,7 @@ services:
       - "3306:3306"
     privileged: true
     command:
-      - "--innodb-buffer-pool-size=384M"
+      - "--innodb-buffer-pool-size=256M"
       - "--innodb-log-file-size=64M"
       - "--max-connections=50"
       - "--performance-schema=OFF"
@@ -81,7 +81,7 @@ services:
     environment:
       - MEILI_MASTER_KEY=eIZBPVDXTq-mx_T581sebN4rrlHfzJ2Q-rjldBNAtr4
       - MEILI_ENV=production
-      - MEILI_MAX_INDEXING_MEMORY=128M
+      - MEILI_MAX_INDEXING_MEMORY=64M
     volumes:
       - meilisearch_data:/meili_data
     healthcheck:
@@ -96,7 +96,7 @@ services:
       resources:
         limits:
           cpus: "0.4"
-          memory: "384M"
+          memory: "192M"
         reservations:
           cpus: "0.2"
-          memory: "192M"
+          memory: "96M"
