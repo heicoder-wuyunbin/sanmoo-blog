@@ -51,7 +51,7 @@ CREATE TABLE `t_access_log` (
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
   KEY `idx_is_error` (`is_error`) USING BTREE,
   KEY `idx_error_id` (`error_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7828 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=7962 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户访问日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,7 +83,7 @@ CREATE TABLE `t_article` (
   KEY `idx_is_top` (`is_top`) USING BTREE,
   KEY `idx_is_published` (`is_published`) USING BTREE,
   KEY `idx_top_published_time` (`is_top`,`is_published`,`create_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +104,7 @@ CREATE TABLE `t_article_category_rel` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `uk_article_category` (`article_id`,`category_id`),
   KEY `idx_category_id` (`category_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章所属分类映射表';
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章所属分类映射表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,7 +125,7 @@ CREATE TABLE `t_article_content` (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `uk_article_id` (`article_id`) USING BTREE,
   CONSTRAINT `fk_article_content_article` FOREIGN KEY (`article_id`) REFERENCES `t_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章内容表';
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章内容表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +147,7 @@ CREATE TABLE `t_article_tag_rel` (
   UNIQUE KEY `uk_article_tag` (`article_id`,`tag_id`) USING BTREE,
   KEY `idx_article_id` (`article_id`) USING BTREE,
   KEY `idx_tag_id` (`tag_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=190 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章对应标签映射表';
+) ENGINE=InnoDB AUTO_INCREMENT=193 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章对应标签映射表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,7 +173,7 @@ CREATE TABLE `t_article_topic_rel` (
   KEY `idx_sort_order` (`sort_order`) USING BTREE,
   CONSTRAINT `fk_article_topic_article` FOREIGN KEY (`article_id`) REFERENCES `t_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_article_topic_topic` FOREIGN KEY (`topic_id`) REFERENCES `t_topic` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章-专题关联表';
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章-专题关联表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -319,7 +319,7 @@ CREATE TABLE `t_category` (
   UNIQUE KEY `uk_name` (`name`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE,
   KEY `idx_deleted_at` (`deleted_at`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章分类表';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章分类表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -350,7 +350,7 @@ CREATE TABLE `t_error_log` (
   KEY `idx_trace_id` (`trace_id`) USING BTREE,
   KEY `idx_error_code` (`error_code`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1249 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统错误日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=1344 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统错误日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -398,32 +398,6 @@ CREATE TABLE `t_mp_browse_history` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `t_mp_reco_exposure`
---
-
-DROP TABLE IF EXISTS `t_mp_reco_exposure`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_mp_reco_exposure` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '微信 openid',
-  `article_id` bigint unsigned NOT NULL COMMENT '文章ID',
-  `strategy` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '推荐策略',
-  `position` int NOT NULL DEFAULT '0' COMMENT '曝光位次',
-  `request_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '一次推荐请求ID',
-  `clicked` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否点击',
-  `exposed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '曝光时间',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_openid_exposed_at` (`openid`,`exposed_at`) USING BTREE,
-  KEY `idx_request_id` (`request_id`) USING BTREE,
-  KEY `idx_article_id` (`article_id`) USING BTREE,
-  CONSTRAINT `fk_mp_exposure_article` FOREIGN KEY (`article_id`) REFERENCES `t_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='小程序推荐曝光日志表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `t_mp_user`
 --
 
@@ -444,32 +418,6 @@ CREATE TABLE `t_mp_user` (
   UNIQUE KEY `uk_openid` (`openid`) USING BTREE,
   KEY `idx_last_login_time` (`last_login_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=206 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='小程序用户表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_mp_user_behavior`
---
-
-DROP TABLE IF EXISTS `t_mp_user_behavior`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_mp_user_behavior` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '微信 openid',
-  `article_id` bigint unsigned NOT NULL COMMENT '文章ID',
-  `event_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '行为类型:view/click/stay/like/favorite/share',
-  `stay_seconds` int NOT NULL DEFAULT '0' COMMENT '停留时长（秒）',
-  `scene` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '场景:home/recommend/detail',
-  `strategy` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '推荐策略:rule/weighted/cf',
-  `event_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '行为发生时间',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_openid_event_time` (`openid`,`event_time`) USING BTREE,
-  KEY `idx_article_event_time` (`article_id`,`event_time`) USING BTREE,
-  KEY `idx_event_type` (`event_type`) USING BTREE,
-  CONSTRAINT `fk_mp_behavior_article` FOREIGN KEY (`article_id`) REFERENCES `t_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=649 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='小程序用户行为日志表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -494,47 +442,6 @@ CREATE TABLE `t_mp_user_favorite` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `t_mp_user_interest`
---
-
-DROP TABLE IF EXISTS `t_mp_user_interest`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_mp_user_interest` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '微信 openid',
-  `dimension_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '维度类型:tag/category',
-  `dimension_id` bigint unsigned NOT NULL COMMENT '维度ID',
-  `score` decimal(12,4) NOT NULL DEFAULT '0.0000' COMMENT '兴趣分',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_openid_dimension` (`openid`,`dimension_type`,`dimension_id`) USING BTREE,
-  KEY `idx_openid_score` (`openid`,`score`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='小程序用户兴趣画像表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_mp_user_profile`
---
-
-DROP TABLE IF EXISTS `t_mp_user_profile`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_mp_user_profile` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '微信 openid',
-  `dimension` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '画像维度名称',
-  `score` decimal(10,4) NOT NULL DEFAULT '0.0000' COMMENT '维度得分(0-100)',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_openid_dimension` (`openid`,`dimension`) USING BTREE,
-  KEY `idx_openid` (`openid`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='微信用户画像表(六边形维度)';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `t_mp_user_subscribe`
 --
 
@@ -542,120 +449,14 @@ DROP TABLE IF EXISTS `t_mp_user_subscribe`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `t_mp_user_subscribe` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `openid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `openid` varchar(128) DEFAULT NULL,
   `subscribe` tinyint(1) DEFAULT NULL,
   `create_time` datetime(3) DEFAULT NULL,
   `update_time` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_t_mp_user_subscribe_open_id` (`openid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='微信小程序用户订阅表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_mp_user_tag`
---
-
-DROP TABLE IF EXISTS `t_mp_user_tag`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_mp_user_tag` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '微信 openid',
-  `tag_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '标签名称',
-  `tag_category` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '标签分类:behavior/preference/level',
-  `score` decimal(10,4) NOT NULL DEFAULT '0.0000' COMMENT '标签得分',
-  `source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'auto' COMMENT '来源:auto/manual',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_openid_tag` (`openid`,`tag_name`) USING BTREE,
-  KEY `idx_openid` (`openid`) USING BTREE,
-  KEY `idx_tag_category` (`tag_category`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='微信用户标签表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_permission`
---
-
-DROP TABLE IF EXISTS `t_permission`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_permission` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `perm_key` varchar(128) NOT NULL COMMENT '权限标识',
-  `name` varchar(64) NOT NULL COMMENT '权限名称',
-  `module` varchar(64) NOT NULL COMMENT '所属模块',
-  `type` varchar(32) NOT NULL DEFAULT 'api' COMMENT '类型：api / menu / button',
-  `description` varchar(255) DEFAULT NULL COMMENT '描述',
-  `front_path` varchar(128) DEFAULT NULL COMMENT '前端菜单路径',
-  `icon` varchar(64) DEFAULT NULL COMMENT '前端菜单图标',
-  `sort_order` int NOT NULL DEFAULT '0' COMMENT '排序',
-  `status` tinyint NOT NULL DEFAULT '1' COMMENT '1启用 0禁用',
-  `create_time` datetime NOT NULL,
-  `update_time` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_perm_key` (`perm_key`),
-  KEY `idx_module` (`module`),
-  KEY `idx_type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='权限表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_role`
---
-
-DROP TABLE IF EXISTS `t_role`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_role` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '角色id',
-  `name` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'è§’è‰²æè¿°',
-  `status` tinyint NOT NULL DEFAULT '1' COMMENT 'çŠ¶æ€ 1å¯ç”¨ 0ç¦ç”¨',
-  `sort_order` int NOT NULL DEFAULT '0' COMMENT 'æŽ’åº',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_name` (`name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_role_permission`
---
-
-DROP TABLE IF EXISTS `t_role_permission`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_role_permission` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `role_id` bigint NOT NULL,
-  `perm_key` varchar(128) NOT NULL,
-  `create_time` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_role_perm` (`role_id`,`perm_key`),
-  KEY `idx_role_id` (`role_id`),
-  KEY `idx_perm_key` (`perm_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='角色-权限关联表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_search_history`
---
-
-DROP TABLE IF EXISTS `t_search_history`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_search_history` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'ä¸»é”®ID',
-  `keyword` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'æœç´¢å…³é”®è¯',
-  `search_time` datetime NOT NULL COMMENT 'æœç´¢æ—¶é—´',
-  PRIMARY KEY (`id`),
-  KEY `idx_search_time` (`search_time`),
-  KEY `idx_keyword` (`keyword`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='æœç´¢åŽ†å²è®°å½•è¡¨';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -672,6 +473,7 @@ CREATE TABLE `t_statistics_article_pv` (
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`article_id`,`pv_date`) USING BTREE,
+  KEY `idx_pv_date` (`pv_date`) USING BTREE,
   CONSTRAINT `fk_pv_article` FOREIGN KEY (`article_id`) REFERENCES `t_article` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='统计表 - 文章 PV';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -695,30 +497,7 @@ CREATE TABLE `t_tag` (
   UNIQUE KEY `uk_name` (`name`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE,
   KEY `idx_deleted_at` (`deleted_at`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='标签表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_third_party_log`
---
-
-DROP TABLE IF EXISTS `t_third_party_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_third_party_log` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `interface_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '接口名称',
-  `request_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '请求URL',
-  `request_params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '请求参数',
-  `response_result` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '响应结果',
-  `error_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '错误信息',
-  `request_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '请求时间',
-  `cost_time` int NOT NULL DEFAULT '0' COMMENT '耗时（毫秒）',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_request_time` (`request_time`) USING BTREE,
-  KEY `idx_interface_name` (`interface_name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='第三方接口调用日志表';
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='标签表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -769,35 +548,12 @@ CREATE TABLE `t_user` (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '创建人',
   `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '更新人',
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否管理员：0否 1是',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `idx_create_time` (`create_time`) USING BTREE,
   KEY `idx_username` (`username`) USING BTREE,
   KEY `idx_email` (`email`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户表';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `t_user_role`
---
-
-DROP TABLE IF EXISTS `t_user_role`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `t_user_role` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `user_id` bigint unsigned NOT NULL COMMENT '用户id',
-  `role_id` bigint unsigned NOT NULL COMMENT '角色id',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
-  `created_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '创建人',
-  `updated_by` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '更新人',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_user_role` (`user_id`,`role_id`) USING BTREE,
-  KEY `idx_user_id` (`user_id`) USING BTREE,
-  KEY `idx_role_id` (`role_id`) USING BTREE,
-  CONSTRAINT `fk_user_role_role` FOREIGN KEY (`role_id`) REFERENCES `t_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_user_role_user` FOREIGN KEY (`user_id`) REFERENCES `t_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户角色表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -809,4 +565,4 @@ CREATE TABLE `t_user_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-16  6:38:23
+-- Dump completed on 2026-07-17  0:53:06
