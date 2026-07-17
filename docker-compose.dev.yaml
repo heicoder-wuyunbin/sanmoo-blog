@@ -23,8 +23,12 @@ services:
       - "3306:3306"
     privileged: true
     command:
-      - "--innodb-buffer-pool-size=256M"
-      - "--innodb-log-file-size=64M"
+      # 缓冲池 — 导入导出性能关键，设为物理内存 5~10%
+      - "--innodb-buffer-pool-size=1G"
+      # 重做日志 — 增大减少 checkpoint 频率，提升大批量写入速度
+      - "--innodb-log-file-size=256M"
+      # 导入时设为 2 减少每次事务的 fsync（本地开发环境安全）
+      - "--innodb-flush-log-at-trx-commit=2"
       - "--max-connections=50"
       - "--performance-schema=OFF"
       - "--skip-log-bin"
@@ -43,11 +47,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: "1G"
+          cpus: "4.0"
+          memory: "4G"
         reservations:
-          cpus: "0.5"
-          memory: "512M"
+          cpus: "2.0"
+          memory: "2G"
 
   redis:
     container_name: redis
