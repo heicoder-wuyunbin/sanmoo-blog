@@ -9,4 +9,4 @@ node_modules
 *.log
 console/
 offline-packages/
-offline-packages/
+console.txt
